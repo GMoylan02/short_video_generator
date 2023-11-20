@@ -1,0 +1,11 @@
+1. ##debug tldr detection DONE
+2. ##add check for unimportant text at the start of a TIFU DONE
+3. ##figure out how to implement the active reddit scraping DONE
+4. ##integrate that with the db DONE
+7. ##Cleanup and remove mp3/mp4 files after it is done (probably not necessary since they get overwritten anyways) DONE
+8. ##use pillows library to make title card DONE
+
+
+9. Make subs more accurate, both by accounting for things that can cause inaccuracy, and making each sub longer
+5. make it able to upload to yt/tiktok/insta
+6. dockerise?
