@@ -8,7 +8,7 @@ TITLE_CUTOFF = 130
 DEFAULT_FONT_SIZE = 18
 DEFAULT_WORDS_PER_LINE = 42
 
-
+# TODO fix issue with text extending past title card
 def create_title_card(title):
     font_size = get_font_size(title)
     helvetica = ImageFont.truetype(path + "Helvetica.ttf", font_size)

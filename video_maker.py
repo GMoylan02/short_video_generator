@@ -6,12 +6,14 @@ import re
 import librosa
 import title_card
 from bisect import bisect_left
+from pathlib import Path
 
 text_speech = pyttsx3.init()
 JAPANESE_VOICE = text_speech.getProperty('voices')[3].id
 DAVID_VOICE = r"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_EN-US_DAVID_11.0"
 ZERO_WIDTH_SPACE = r"&#x200B;"
-asset_path = r"assets/"
+asset_path = r'assets\\'
+
 
 # TODO implement other subs such as confessions, trueoffmychest,
 # TODO make it so certain characters dont count towards no_characters such as " / (), currency signs etcetera etc
@@ -69,8 +71,8 @@ class video:
         # Loops through all the audio clips and appends each to the corresponding video
         for i in range(len(self.audio_starting_points) - 1):
             video = clip.subclip(self.audio_starting_points[i], self.audio_starting_points[i + 1])
-            video = video.set_audio(AudioFileClip(fr"D:\gitdirs\video-generator\clip_audio{i}.mp3"))
-            video.write_videofile(fr"D:\gitdirs\video-generator\test_video{i}.mp4")
+            video = video.set_audio(AudioFileClip(fr"clip_audio{i}.mp3"))
+            video.write_videofile(fr"test_video{i}.mp4")
             self.video_clip_list.append(VideoFileClip(f"test_video{i}.mp4"))
         video_clip = self.video_clip_list[0]
 
@@ -89,7 +91,7 @@ class video:
     # Generates audio given the post title and text
     def generate_audio(self):
         text_speech.setProperty("voice", DAVID_VOICE)
-        text_speech.setProperty('rate', self.no_words if self.no_words > 200 else 200)
+        text_speech.setProperty('rate', 275)
         for i in range(len(self.section_list)-1):
             text_speech.save_to_file(self.section_list[i], f"clip_audio{i}.mp3")
         text_speech.runAndWait()

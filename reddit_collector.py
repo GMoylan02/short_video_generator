@@ -14,6 +14,8 @@ import textwrap
 import title_card
 import Constants as c
 
+import store_ids as s
+
 # The idea right now is, take the top x posts on TIFU, filter out posts that have images, or more than 320 words after formatting,
 # or have already been made into a video. If that list is now empty, take the next x posts and repeat. Once you
 # get a nonempty list, pick a post randomly and turn it into a video.
@@ -54,13 +56,13 @@ def scrape_posts():
             print("Couldn't find a valid reddit post somehow. ")
         for post in posts:
             i += 1
-            my_query: dict[str, int] = {"id": post.id}
+            my_id = post.id
 
             # get 1st quarter of text
             first_quarter = get_first_nth(post.selftext, 4)
-            if (video_maker.get_no_words(video_maker.format_text(str(post.selftext))) > 20 and
+            if (20 < video_maker.get_no_words(video_maker.format_text(str(post.selftext))) < 400 and
                     "reddit" in str(post.url) and not
-                    mongo.document_exists(my_query) and not  # TODO
+                    s.entry_exists(my_id) and not  # TODO
                     "update" in str(post.title).lower() and not
                 first_quarter.upper().__contains__("TL;DR" or "TLDR" or "TL DR" or "UPDATE" or
                                                    "EDIT" or "KIND STRANGER" or "THANKS FOR THE GOLD")):
@@ -95,7 +97,7 @@ def scrape_posts():
         title_card.create_title_card(post["title"])
         tifu_video = video(post["title"], post["selftext"])
         tifu_video.create_video()
-        mongo.db.reddit_posts.insert_one({"id": post["id"]})  # TODO
+        s.insert(post["id"])  # TODO
     except Exception as e:
         print(e)
         print("Couldn't make a video, or couldn't put the video in the db, or couldn't make a title card")
