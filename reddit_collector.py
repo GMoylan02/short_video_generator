@@ -3,6 +3,8 @@ from typing import Dict, Any
 import reddit_data_collector as rdc
 import pandas as pd
 import praw
+
+import Constants
 import video_maker
 import os
 import mongo
@@ -10,6 +12,7 @@ import random
 from video_maker import video
 import textwrap
 import title_card
+import Constants as c
 
 # The idea right now is, take the top x posts on TIFU, filter out posts that have images, or more than 320 words after formatting,
 # or have already been made into a video. If that list is now empty, take the next x posts and repeat. Once you
@@ -18,8 +21,8 @@ import title_card
 
 
 def scrape_posts():
-    reddit_read_only = praw.Reddit(client_id='_',
-                                   client_secret='_',
+    reddit_read_only = praw.Reddit(client_id=c.CLIENT_ID,
+                                   client_secret=c.CLIENT_SECRET,
                                    user_agent='ReddReader by /u/Wide_Watercress3180'
                                    )
     subreddit = reddit_read_only.subreddit("tifu")
@@ -57,7 +60,7 @@ def scrape_posts():
             first_quarter = get_first_nth(post.selftext, 4)
             if (video_maker.get_no_words(video_maker.format_text(str(post.selftext))) > 20 and
                     "reddit" in str(post.url) and not
-                    mongo.document_exists(my_query) and not
+                    mongo.document_exists(my_query) and not  # TODO
                     "update" in str(post.title).lower() and not
                 first_quarter.upper().__contains__("TL;DR" or "TLDR" or "TL DR" or "UPDATE" or
                                                    "EDIT" or "KIND STRANGER" or "THANKS FOR THE GOLD")):
@@ -92,7 +95,7 @@ def scrape_posts():
         title_card.create_title_card(post["title"])
         tifu_video = video(post["title"], post["selftext"])
         tifu_video.create_video()
-        mongo.db.reddit_posts.insert_one({"id": post["id"]})
+        mongo.db.reddit_posts.insert_one({"id": post["id"]})  # TODO
     except Exception as e:
         print(e)
         print("Couldn't make a video, or couldn't put the video in the db, or couldn't make a title card")

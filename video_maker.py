@@ -16,7 +16,9 @@ asset_path = r"assets/"
 # TODO implement other subs such as confessions, trueoffmychest,
 # TODO make it so certain characters dont count towards no_characters such as " / (), currency signs etcetera etc
 # TODO make subs more accurate by making each sub longer than 3 words
+# TODO use os.join
 # Split based on comma, sentence and make long subs go onto next line
+
 
 class video:
     def __init__(self, title, post_text):
