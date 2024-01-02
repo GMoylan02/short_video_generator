@@ -4,3 +4,8 @@ Constants.py
 .env
 *.pyc
 *.pyc
+*.mp3
+ids.txt
+ids.txt
+subs.srt
+*.srt

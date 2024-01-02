@@ -7,9 +7,8 @@ import praw
 import Constants
 import video_maker
 import os
-import mongo
 import random
-from video_maker import video
+import video as v
 import textwrap
 import title_card
 import Constants as c
@@ -60,7 +59,7 @@ def scrape_posts():
 
             # get 1st quarter of text
             first_quarter = get_first_nth(post.selftext, 4)
-            if (20 < video_maker.get_no_words(video_maker.format_text(str(post.selftext))) < 400 and
+            if (20 < v.get_no_words(v.format_text(str(post.selftext))) < 400 and
                     "reddit" in str(post.url) and not
                     s.entry_exists(my_id) and not  # TODO
                     "update" in str(post.title).lower() and not
@@ -95,8 +94,7 @@ def scrape_posts():
     }
     try:
         title_card.create_title_card(post["title"])
-        tifu_video = video(post["title"], post["selftext"])
-        tifu_video.create_video()
+        v.create_video(post["title"], post["selftext"])
         s.insert(post["id"])  # TODO
     except Exception as e:
         print(e)
