@@ -19,7 +19,7 @@ def second_to_timecode(x: float) -> str:
 def to_srt(
         words: Sequence[pvleopard.Leopard.Word],
         endpoint_sec: float = 1.,
-        length_limit: Optional[int] = 16) -> str:
+        length_limit: Optional[int] = 1) -> str:
     def _helper(end: int) -> None:
         lines.append("%d" % section)
         lines.append(

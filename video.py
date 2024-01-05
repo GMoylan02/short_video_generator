@@ -28,7 +28,7 @@ def create_video(title, post_text):
 
     audio_path = generate_audio(formatted_text)
     subs_path = generate_subs(audio_path)
-    generator = lambda txt: TextClip(txt, font='Tahoma-Bold', fontsize=36, color='white', stroke_color='black',
+    generator = lambda txt: TextClip(txt, font='Tahoma-Bold', fontsize=80, color='white', stroke_color='black',
                                      stroke_width=3)
     subs = SubtitlesClip(subs_path, generator)
     subtitles = SubtitlesClip(subs, generator)
@@ -54,7 +54,7 @@ def generate_audio(formatted_text):
     """
     filepath = f'clip_audio.mp3'
     text_speech.setProperty("voice", DAVID_VOICE)
-    text_speech.setProperty('rate', 220)
+    text_speech.setProperty('rate', 200)
 
     text_speech.save_to_file(formatted_text, filepath)
     text_speech.runAndWait()
@@ -64,7 +64,7 @@ def generate_audio(formatted_text):
 
 def generate_subs(audio_path: str):
     """
-    Given a path to an mp3 file, generate a
+    Given a path to an mp3 file, generates a subtitle srt file
     :param audio_path:
     :return:
     """
