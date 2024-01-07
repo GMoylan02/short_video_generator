@@ -41,10 +41,10 @@ def create_video(title, post_text):
     video = background_footage.set_audio(AudioFileClip(audio_path))
     result = CompositeVideoClip([video, subtitles.set_pos(('center', 'center'))])
     # Comment the next 4 lines of code out for testing
-    title_card_length = get_audio_length("file0.mp3")
-    title_card_clip = ImageClip(img=asset_path + "title_card.png").set_start(0) \
-        .set_duration(title_card_length).set_pos(("center", "center")).resize((350, 350))
-    result = CompositeVideoClip([result, title_card_clip])
+    #title_card_length = get_audio_length("file0.mp3")
+    #title_card_clip = ImageClip(img=asset_path + "title_card.png").set_start(0) \
+    #    .set_duration(title_card_length).set_pos(("center", "center")).resize(height=350, width=350)
+    #result = CompositeVideoClip([result, title_card_clip])
     #
     result.write_videofile(fr"final_video.mp4")
 
@@ -65,6 +65,7 @@ def generate_audio(formatted_text):
     sentence_list = compress_sentence_list(sentence_list)
     audio_files = []
     for i, sentence in enumerate(sentence_list):
+        print(f'sentence {i} is {sentence}')
         a.tts(session_id=Constants.TIKTOK_SESSION, text_speaker=speaker, req_text=sentence, filename=f"file{i}.mp3", play=False)
         audio_files.append(f"file{i}.mp3")
     audios = []
@@ -94,11 +95,12 @@ def compress_sentence_list(sentence_list):
     for sentence in sentence_list[1:]:
         if len(result) == 0:
             result.append(sentence)
-        elif len(result[-1] + sentence) < 190:
+        elif len(result[-1] + sentence) < 190 and result[-1] != result[0]:
             result[-1] = result[-1] + sentence
         else:
             result.append(sentence)
-
+    print(f'sentence list is {sentence_list}')
+    print(f'result is {result}')
     return result
 
 
