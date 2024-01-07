@@ -1,19 +1,17 @@
 from moviepy.editor import *
 from moviepy.video.tools.subtitles import SubtitlesClip
-import pyttsx3
 import random
 import re
 import librosa
+import audio as a
 
 import Constants
-import title_card
+#import title_card
 from bisect import bisect_left
-from pathlib import Path
+#from pathlib import Path
 import pvleopard
 import subtitles as subs
 
-text_speech = pyttsx3.init()
-JAPANESE_VOICE = text_speech.getProperty('voices')[3].id
 leopard = pvleopard.create(access_key=Constants.PICOVOICE_KEY)
 DAVID_VOICE = r"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_EN-US_DAVID_11.0"
 ZERO_WIDTH_SPACE = r"&#x200B;"
@@ -23,24 +21,31 @@ footage_path = r'assets\footage/'
 
 def create_video(title, post_text):
 
-    formatted_text = title + format_text(post_text)
+    formatted_text = title + '. ' + format_text(post_text)
     full_gameplay = VideoFileClip(get_random_background_video(footage_path))
 
     audio_path = generate_audio(formatted_text)
     subs_path = generate_subs(audio_path)
+
     generator = lambda txt: TextClip(txt, font='Tahoma-Bold', fontsize=80, color='white', stroke_color='black',
                                      stroke_width=3)
     subs = SubtitlesClip(subs_path, generator)
     subtitles = SubtitlesClip(subs, generator)
     tts_length = get_audio_length(audio_path)
 
-    video_start = random.randint(22, 480)
+    video_start = random.randint(22, 430)
     video_end = video_start + tts_length + 2
 
     background_footage = full_gameplay.subclip(video_start, video_end)
 
     video = background_footage.set_audio(AudioFileClip(audio_path))
     result = CompositeVideoClip([video, subtitles.set_pos(('center', 'center'))])
+    # Comment the next 4 lines of code out for testing
+    title_card_length = get_audio_length("file0.mp3")
+    title_card_clip = ImageClip(img=asset_path + "title_card.png").set_start(0) \
+        .set_duration(title_card_length).set_pos(("center", "center")).resize((350, 350))
+    result = CompositeVideoClip([result, title_card_clip])
+    #
     result.write_videofile(fr"final_video.mp4")
 
 
@@ -53,13 +58,48 @@ def generate_audio(formatted_text):
     @return: file path to generated audio
     """
     filepath = f'clip_audio.mp3'
-    text_speech.setProperty("voice", DAVID_VOICE)
-    text_speech.setProperty('rate', 200)
-
-    text_speech.save_to_file(formatted_text, filepath)
-    text_speech.runAndWait()
+    speaker = "en_us_006"
+    script_path = string_to_txt(formatted_text)
+    req_text = open(script_path, 'r', errors='ignore', encoding='utf-8').read()
+    sentence_list = req_text.split('.')
+    sentence_list = compress_sentence_list(sentence_list)
+    audio_files = []
+    for i, sentence in enumerate(sentence_list):
+        a.tts(session_id=Constants.TIKTOK_SESSION, text_speaker=speaker, req_text=sentence, filename=f"file{i}.mp3", play=False)
+        audio_files.append(f"file{i}.mp3")
+    audios = []
+    for i, audio in enumerate(audio_files):
+        audios.append(AudioFileClip(audio))
+    clips: AudioClip = concatenate_audioclips([audio for audio in audios])
+    clips.write_audiofile(filepath)
 
     return filepath
+
+
+def string_to_txt(text):
+    if text[-1] == '.':
+        text = text[:-1]
+    with open('script.txt', 'w') as file:
+        file.write(text)
+    return 'script.txt'
+
+
+def compress_sentence_list(sentence_list):
+    """
+    Assuming non-latin characters already removed
+
+    """
+    result = []
+    result.append(sentence_list[0])
+    for sentence in sentence_list[1:]:
+        if len(result) == 0:
+            result.append(sentence)
+        elif len(result[-1] + sentence) < 190:
+            result[-1] = result[-1] + sentence
+        else:
+            result.append(sentence)
+
+    return result
 
 
 def generate_subs(audio_path: str):
@@ -109,6 +149,9 @@ def format_text(post_text):
 
     # Doesn't need to be comprehensive, just replace certain common capitalisations of tifu with TIFU
     formatted_text.replace("tifu" or "Tifu" or "tiFU" or "tIFU", "TIFU")
+
+    if len(formatted_text) > 0 and formatted_text[-1] == '.':
+        formatted_text = formatted_text[:-1]
     return formatted_text
 
 

@@ -102,6 +102,7 @@ def scrape_posts():
 
 
 #Splits a string into N equal parts and returns the first Nth part
+# TODO this is possibly faulty
 def get_first_nth(text, n):
     text_length = len(text)
 
