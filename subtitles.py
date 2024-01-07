@@ -6,6 +6,8 @@ import pvleopard
 Not my work, taken from https://picovoice.ai/blog/how-to-create-subtitles-for-any-video-with-python/
 """
 
+# TODO Make it so when there is 1 sub at a time, fill in the empty gaps between subs
+
 
 def second_to_timecode(x: float) -> str:
     hour, x = divmod(x, 3600)

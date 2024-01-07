@@ -20,13 +20,18 @@ import store_ids as s
 # get a nonempty list, pick a post randomly and turn it into a video.
 # also remove TIFUpdates
 
+# TODO implement other subs such as confessions, trueoffmychest,
+
 
 def scrape_posts():
     reddit_read_only = praw.Reddit(client_id=c.CLIENT_ID,
                                    client_secret=c.CLIENT_SECRET,
                                    user_agent='ReddReader by /u/Wide_Watercress3180'
                                    )
-    subreddit = reddit_read_only.subreddit("tifu")
+    subreddit_string = random.choice([
+        'tifu', 'talesfromthepizzaguy', 'talesfromthefrontdesk', 'talesfromtechsupport', 'talesfromretail'
+    ])
+    subreddit = reddit_read_only.subreddit(subreddit_string)
     posts = subreddit.top(time_filter="all", limit=150)
     posts_dict = {"Title": [], "Post Text": [],
                   "ID": [], "Score": [],
@@ -61,7 +66,7 @@ def scrape_posts():
             first_quarter = get_first_nth(post.selftext, 4)
             if (20 < v.get_no_words(v.format_text(str(post.selftext))) < 400 and
                     "reddit" in str(post.url) and not
-                    s.entry_exists(my_id) and not  # TODO
+                    s.entry_exists(my_id, subreddit_string) and not  # TODO
                     "update" in str(post.title).lower() and not
                 first_quarter.upper().__contains__("TL;DR" or "TLDR" or "TL DR" or "UPDATE" or
                                                    "EDIT" or "KIND STRANGER" or "THANKS FOR THE GOLD")):
@@ -93,16 +98,15 @@ def scrape_posts():
         "url": temp_list[4][randint]
     }
     try:
-        title_card.create_title_card(post["title"])
+        title_card.create_title_card(subreddit=subreddit_string, title=post["title"])
         v.create_video(post["title"], post["selftext"])
-        s.insert(post["id"])  # TODO
+        s.insert(post["id"], subreddit_string)  # TODO
     except Exception as e:
         print(e)
         print("Couldn't make a video, or couldn't put the video in the db, or couldn't make a title card")
 
 
 #Splits a string into N equal parts and returns the first Nth part
-# TODO this is possibly faulty
 def get_first_nth(text, n):
     text_length = len(text)
 

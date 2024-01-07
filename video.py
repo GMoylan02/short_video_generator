@@ -4,11 +4,8 @@ import random
 import re
 import librosa
 import audio as a
-
 import Constants
-#import title_card
 from bisect import bisect_left
-#from pathlib import Path
 import pvleopard
 import subtitles as subs
 
@@ -20,19 +17,25 @@ footage_path = r'assets\footage/'
 
 
 def create_video(title, post_text):
-
-    formatted_text = title + '. ' + format_text(post_text)
+    # Format the text according to what is needed
+    formatted_text = format_text(post_text)
+    # Choose which mp4 from the background videos folder to use
     full_gameplay = VideoFileClip(get_random_background_video(footage_path))
 
-    audio_path = generate_audio(formatted_text)
+    # Generates an mp3 at audio_path
+    audio_path = generate_audio(title, formatted_text)
+    # Generates an srt at subs_path
     subs_path = generate_subs(audio_path)
 
+    # Generate subtitles
     generator = lambda txt: TextClip(txt, font='Tahoma-Bold', fontsize=80, color='white', stroke_color='black',
                                      stroke_width=3)
     subs = SubtitlesClip(subs_path, generator)
     subtitles = SubtitlesClip(subs, generator)
-    tts_length = get_audio_length(audio_path)
 
+    # Get length of the whole audio file
+    tts_length = get_audio_length(audio_path)
+    # TODO change this so the b is the length of the background video minus like 40
     video_start = random.randint(22, 430)
     video_end = video_start + tts_length + 2
 
@@ -41,15 +44,15 @@ def create_video(title, post_text):
     video = background_footage.set_audio(AudioFileClip(audio_path))
     result = CompositeVideoClip([video, subtitles.set_pos(('center', 'center'))])
     # Comment the next 4 lines of code out for testing
-    #title_card_length = get_audio_length("file0.mp3")
-    #title_card_clip = ImageClip(img=asset_path + "title_card.png").set_start(0) \
-    #    .set_duration(title_card_length).set_pos(("center", "center")).resize(height=350, width=350)
-    #result = CompositeVideoClip([result, title_card_clip])
+    title_card_length = get_audio_length("file0.mp3")
+    title_card_clip = ImageClip(img=asset_path + "title_card.png").set_start(0) \
+        .set_duration(title_card_length).set_pos(("center", "center")).resize(height=350, width=350)
+    result = CompositeVideoClip([result, title_card_clip])
     #
     result.write_videofile(fr"final_video.mp4")
 
 
-def generate_audio(formatted_text):
+def generate_audio(title: str, formatted_text: str):
     """
     Given the pre-formatted body of the text, turns that text into a
     text-to-speech mp3 file.
@@ -59,13 +62,12 @@ def generate_audio(formatted_text):
     """
     filepath = f'clip_audio.mp3'
     speaker = "en_us_006"
-    script_path = string_to_txt(formatted_text)
-    req_text = open(script_path, 'r', errors='ignore', encoding='utf-8').read()
-    sentence_list = req_text.split('.')
+    #script_path = string_to_txt(formatted_text)
+    #req_text = open(script_path, 'r', errors='ignore', encoding='utf-8').read()
+    sentence_list = [title] + formatted_text.split('.')
     sentence_list = compress_sentence_list(sentence_list)
     audio_files = []
     for i, sentence in enumerate(sentence_list):
-        print(f'sentence {i} is {sentence}')
         a.tts(session_id=Constants.TIKTOK_SESSION, text_speaker=speaker, req_text=sentence, filename=f"file{i}.mp3", play=False)
         audio_files.append(f"file{i}.mp3")
     audios = []
@@ -73,6 +75,9 @@ def generate_audio(formatted_text):
         audios.append(AudioFileClip(audio))
     clips: AudioClip = concatenate_audioclips([audio for audio in audios])
     clips.write_audiofile(filepath)
+
+    # Deletes the intermediary audio files created during this function
+    delete_videos()
 
     return filepath
 
@@ -99,8 +104,9 @@ def compress_sentence_list(sentence_list):
             result[-1] = result[-1] + sentence
         else:
             result.append(sentence)
-    print(f'sentence list is {sentence_list}')
-    print(f'result is {result}')
+    while result[-1][-1] == ' ' or result[-1][-1] == '.':
+        result[-1] = result[-1][:-1]
+    print(result)
     return result
 
 
@@ -157,22 +163,6 @@ def format_text(post_text):
     return formatted_text
 
 
-def delete_videos():
-    """
-    Deletes intermediary videos (probably unnecessary now)
-
-    :return:
-    """
-    i = 0
-    while os.path.exists(f"clip_audio{i}.mp3"):
-        os.remove(f"clip_audio{i}.mp3")
-        i += 1
-    i = 0
-    while os.path.exists(f"test_video{i}.mp4"):
-        os.remove(f"test_video{i}.mp4")
-        i += 1
-
-
 def get_no_words(text):
     no_words = len(re.findall(r'\w+', text))
     return no_words
@@ -211,6 +201,16 @@ def get_audio_length(path):
     except Exception as e:
         print(e)
         return None
+
+
+def delete_videos():
+    """
+    Deletes all the audio files created in making a full video.
+    """
+    i = 0
+    while os.path.exists(f"file{i}.mp3"):
+        os.remove(f"file{i}.mp3")
+        i += 1
 
 
 
