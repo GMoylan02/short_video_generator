@@ -15,7 +15,7 @@ ZERO_WIDTH_SPACE = r"&#x200B;"
 asset_path = r'assets/'
 footage_path = r'assets\footage/'
 
-
+# TODO change how file paths are done so this works on any machine
 def create_video(title, post_text):
     # Format the text according to what is needed
     formatted_text = format_text(post_text)
@@ -56,19 +56,21 @@ def generate_audio(title: str, formatted_text: str):
     """
     Given the pre-formatted body of the text, turns that text into a
     text-to-speech mp3 file.
-    
+
     :param formatted_text:
     @return: file path to generated audio
     """
     filepath = f'clip_audio.mp3'
     speaker = "en_us_006"
-    #script_path = string_to_txt(formatted_text)
-    #req_text = open(script_path, 'r', errors='ignore', encoding='utf-8').read()
+    # script_path = string_to_txt(formatted_text)
+    # req_text = open(script_path, 'r', errors='ignore', encoding='utf-8').read()
     sentence_list = [title] + formatted_text.split('.')
     sentence_list = compress_sentence_list(sentence_list)
     audio_files = []
     for i, sentence in enumerate(sentence_list):
-        a.tts(session_id=Constants.TIKTOK_SESSION, text_speaker=speaker, req_text=sentence, filename=f"file{i}.mp3", play=False)
+        # todo parallelise
+        a.tts(session_id=Constants.TIKTOK_SESSION, text_speaker=speaker, req_text=sentence, filename=f"file{i}.mp3",
+              play=False)
         audio_files.append(f"file{i}.mp3")
     audios = []
     for i, audio in enumerate(audio_files):
@@ -106,7 +108,6 @@ def compress_sentence_list(sentence_list):
             result.append(sentence)
     while result[-1][-1] == ' ' or result[-1][-1] == '.':
         result[-1] = result[-1][:-1]
-    print(result)
     return result
 
 
@@ -207,11 +208,7 @@ def delete_videos():
     """
     Deletes all the audio files created in making a full video.
     """
-    i = 0
+    i = 1
     while os.path.exists(f"file{i}.mp3"):
         os.remove(f"file{i}.mp3")
         i += 1
-
-
-
-

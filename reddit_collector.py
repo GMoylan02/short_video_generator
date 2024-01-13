@@ -1,26 +1,10 @@
-from typing import Dict, Any
 
-import reddit_data_collector as rdc
-import pandas as pd
 import praw
-
-import Constants
-import video_maker
-import os
 import random
 import video as v
-import textwrap
 import title_card
 import Constants as c
-
 import store_ids as s
-
-# The idea right now is, take the top x posts on TIFU, filter out posts that have images, or more than 320 words after formatting,
-# or have already been made into a video. If that list is now empty, take the next x posts and repeat. Once you
-# get a nonempty list, pick a post randomly and turn it into a video.
-# also remove TIFUpdates
-
-# TODO implement other subs such as confessions, trueoffmychest,
 
 
 def scrape_posts():
@@ -66,7 +50,7 @@ def scrape_posts():
             first_quarter = get_first_nth(post.selftext, 4)
             if (20 < v.get_no_words(v.format_text(str(post.selftext))) < 400 and
                     "reddit" in str(post.url) and not
-                    s.entry_exists(my_id, subreddit_string) and not  # TODO
+                    s.entry_exists(my_id, subreddit_string) and not
                     "update" in str(post.title).lower() and not
                 first_quarter.upper().__contains__("TL;DR" or "TLDR" or "TL DR" or "UPDATE" or
                                                    "EDIT" or "KIND STRANGER" or "THANKS FOR THE GOLD")):
@@ -100,7 +84,7 @@ def scrape_posts():
     try:
         title_card.create_title_card(subreddit=subreddit_string, title=post["title"])
         v.create_video(post["title"], post["selftext"])
-        s.insert(post["id"], subreddit_string)  # TODO
+        s.insert(post["id"], subreddit_string)
     except Exception as e:
         print(e)
         print("Couldn't make a video, or couldn't put the video in the db, or couldn't make a title card")
@@ -117,3 +101,7 @@ def get_first_nth(text, n):
 
     part_size = int(text_length / n)
     return text[0: part_size]
+
+
+if __name__ == '__main__':
+    scrape_posts()

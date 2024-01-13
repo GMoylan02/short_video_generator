@@ -1,6 +1,5 @@
 
 *.mp4
-Constants.py
 .env
 *.pyc
 *.pyc
@@ -9,3 +8,5 @@ ids.txt
 ids.txt
 subs.srt
 *.srt
+ids.txt
+script.txt
