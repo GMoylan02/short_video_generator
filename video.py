@@ -9,6 +9,7 @@ import Constants
 from bisect import bisect_left
 import pvleopard
 import subtitles as subs
+import concurrent.futures
 
 leopard = pvleopard.create(access_key=Constants.PICOVOICE_KEY)
 DAVID_VOICE = r"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_EN-US_DAVID_11.0"
@@ -45,16 +46,18 @@ def create_video(title, post_text):
     result = CompositeVideoClip([video, subtitles.set_pos(('center', 'center'))])
 
     # Comment the next 4 lines of code out for testing
-    title_card_length = get_audio_length("file0.mp3")
-    title_card_clip = ImageClip(img=asset_path + "title_card.png").set_start(0) \
-        .set_duration(title_card_length).set_pos(("center", "center")).resize(height=350, width=350)
-    result = CompositeVideoClip([result, title_card_clip])
+    #title_card_length = get_audio_length("file0.mp3")
+    #title_card_clip = ImageClip(img=asset_path + "title_card.png").set_start(0) \
+    #    .set_duration(title_card_length).set_pos(("center", "center")).resize(height=350, width=350)
+    #result = CompositeVideoClip([result, title_card_clip])
     #
     if video_end - video_start > 60:
         result.write_videofile(fr"video.mp4")
         ffmpeg_extract_subclip('video.mp4', 0, 60, 'final_video.mp4')
     else:
         result.write_videofile(fr"final_video.mp4")
+
+
 def generate_audio(title: str, formatted_text: str):
     """
     Given the pre-formatted body of the text, turns that text into a
@@ -70,11 +73,17 @@ def generate_audio(title: str, formatted_text: str):
     sentence_list = [title] + formatted_text.split('.')
     sentence_list = compress_sentence_list(sentence_list)
     audio_files = []
+
+    def generate_tts(index):
+        a.tts(session_id=Constants.TIKTOK_SESSION, text_speaker=speaker, req_text=sentence_list[index], filename=f"file{index}.mp3",
+            play=False)
+
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [executor.submit(generate_tts, i) for i in range(len(sentence_list))]
+
     for i, sentence in enumerate(sentence_list):
-        # todo parallelise
-        a.tts(session_id=Constants.TIKTOK_SESSION, text_speaker=speaker, req_text=sentence, filename=f"file{i}.mp3",
-              play=False)
         audio_files.append(f"file{i}.mp3")
+
     audios = []
     for i, audio in enumerate(audio_files):
         audios.append(AudioFileClip(audio))
@@ -85,6 +94,7 @@ def generate_audio(title: str, formatted_text: str):
     delete_videos()
 
     return filepath
+
 
 
 def string_to_txt(text):
