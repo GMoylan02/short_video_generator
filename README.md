@@ -1,5 +1,3 @@
-# WIP
-
 #  Short Video Generator
 
 Scrapes topics from Reddit and makes short form Youtube shorts/Tiktok content from it
@@ -38,7 +36,16 @@ You also need to provide background footage to be used when generating the video
 and aspect ratio of the background footage you provide will be the quality and aspect ratio
 of the final product.
 
-Put any `.mp4` files you want to use as background footage into `/assets/footage`
+Put any `.mp4` files you want to use as background footage into the `/assets/footage` folder.
+
+## Adding more subreddits
+If you want to add more subreddits or change the pool of
+possible subreddits, go to `reddit_collector.py` and alter
+the list of subreddits however you would like.
+
+Keep in mind that my program reads the body of the Reddit post and doesn't 
+consider any comments.
+
 
 
 

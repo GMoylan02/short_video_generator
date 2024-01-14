@@ -11,13 +11,13 @@ import pvleopard
 import subtitles as subs
 import concurrent.futures
 
+
 leopard = pvleopard.create(access_key=Constants.PICOVOICE_KEY)
-DAVID_VOICE = r"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_EN-US_DAVID_11.0"
 ZERO_WIDTH_SPACE = r"&#x200B;"
 asset_path = r'assets/'
 footage_path = r'assets\footage/'
 
-# TODO change how file paths are done so this works on any machine
+
 def create_video(title, post_text):
     # Format the text according to what is needed
     formatted_text = format_text(post_text)
@@ -96,7 +96,6 @@ def generate_audio(title: str, formatted_text: str):
     delete_videos()
 
     return filepath
-
 
 
 def string_to_txt(text):
