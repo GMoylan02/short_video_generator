@@ -1,5 +1,6 @@
 from moviepy.editor import *
 from moviepy.video.tools.subtitles import SubtitlesClip
+from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
 import random
 import re
 import librosa
@@ -35,23 +36,25 @@ def create_video(title, post_text):
 
     # Get length of the whole audio file
     tts_length = get_audio_length(audio_path)
-    # TODO change this so the b is the length of the background video minus like 40
-    video_start = random.randint(22, 430)
+    video_start = random.randint(22, int(full_gameplay.duration)-60)
     video_end = video_start + tts_length + 2
 
     background_footage = full_gameplay.subclip(video_start, video_end)
 
     video = background_footage.set_audio(AudioFileClip(audio_path))
     result = CompositeVideoClip([video, subtitles.set_pos(('center', 'center'))])
+
     # Comment the next 4 lines of code out for testing
     title_card_length = get_audio_length("file0.mp3")
     title_card_clip = ImageClip(img=asset_path + "title_card.png").set_start(0) \
         .set_duration(title_card_length).set_pos(("center", "center")).resize(height=350, width=350)
     result = CompositeVideoClip([result, title_card_clip])
     #
-    result.write_videofile(fr"final_video.mp4")
-
-
+    if video_end - video_start > 60:
+        result.write_videofile(fr"video.mp4")
+        ffmpeg_extract_subclip('video.mp4', 0, 60, 'final_video.mp4')
+    else:
+        result.write_videofile(fr"final_video.mp4")
 def generate_audio(title: str, formatted_text: str):
     """
     Given the pre-formatted body of the text, turns that text into a

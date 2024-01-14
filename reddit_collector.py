@@ -88,6 +88,7 @@ def scrape_posts():
     except Exception as e:
         print(e)
         print("Couldn't make a video, or couldn't put the video in the db, or couldn't make a title card")
+        print(f'The post that had issues was {post["title"]}, id {post["id"]}')
 
 
 #Splits a string into N equal parts and returns the first Nth part
