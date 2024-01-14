@@ -46,16 +46,18 @@ def create_video(title, post_text):
     result = CompositeVideoClip([video, subtitles.set_pos(('center', 'center'))])
 
     # Comment the next 4 lines of code out for testing
-    #title_card_length = get_audio_length("file0.mp3")
-    #title_card_clip = ImageClip(img=asset_path + "title_card.png").set_start(0) \
-    #    .set_duration(title_card_length).set_pos(("center", "center")).resize(height=350, width=350)
-    #result = CompositeVideoClip([result, title_card_clip])
+    title_card_length = get_audio_length("file0.mp3")
+    title_card_clip = ImageClip(img=asset_path + "title_card.png").set_start(0) \
+        .set_duration(title_card_length).set_pos(("center", "center")).resize(height=350, width=350)
+    result = CompositeVideoClip([result, title_card_clip])
     #
-    if video_end - video_start > 60:
+    video_length = video_end - video_start
+    if video_length > 60:
         result.write_videofile(fr"video.mp4")
         ffmpeg_extract_subclip('video.mp4', 0, 60, 'final_video.mp4')
     else:
-        result.write_videofile(fr"final_video.mp4")
+        result.write_videofile(fr"video.mp4")
+        ffmpeg_extract_subclip('video.mp4', 0, video_length - 2, 'final_video.mp4')
 
 
 def generate_audio(title: str, formatted_text: str):

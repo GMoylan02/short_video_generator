@@ -8,15 +8,16 @@ TITLE_CUTOFF = 130
 DEFAULT_FONT_SIZE = 18
 DEFAULT_WORDS_PER_LINE = 42
 
-# TODO fix issue with text extending past title card, change the placement of the subreddit name or remove it entirely
+
 def create_title_card(subreddit, title):
-    font_size = get_font_size(fr'{title}  /r/{subreddit}')
+    font_size = get_font_size(title)
     helvetica = ImageFont.truetype(path + "Helvetica.ttf", font_size)
     with Image.open(path+"title_card_template.png") as title_card:
         draw = ImageDraw.Draw(title_card)
-        line_list = split_title(fr'{title}  /r/{subreddit}')
+        line_list = split_title(title)
         for i in range(len(line_list)):
             draw.text((20, 70 + i * font_size), line_list[i], (0, 0, 0), font=helvetica)
+        draw.text((185, 15), fr'/r/{subreddit}', (0, 0, 0), font=helvetica)
         title_card.save(path + "title_card.png")
 
 
